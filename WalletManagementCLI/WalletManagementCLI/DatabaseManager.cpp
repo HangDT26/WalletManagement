@@ -2,7 +2,7 @@
 #include "pch.h"
 
 SqlConnection^ DatabaseManager::GetConnection() {
-  String^ connectionString = "Server=ADMINISTRATOR;Database=WalletManagement;User Id=sa;Password=1234$;";
+  String^ connectionString = "Server=[Your_Server];Database=WalletManagement;User Id=[Your_Id];Password=[Your_Password];";
   return gcnew SqlConnection(connectionString);
 }
 
