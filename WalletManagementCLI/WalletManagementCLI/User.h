@@ -28,7 +28,7 @@ public:
   static std::vector<User> GetAllUsers();
   static bool Login(std::string userName, std::string password);
   static std::string generateOTP();
-  bool ChangePassword(std::string newPassword);
+  bool ChangePassword(int userId, std::string newPassword);
   static bool VerifyOTP(int userId, std::string inputOTP);
 };
 
