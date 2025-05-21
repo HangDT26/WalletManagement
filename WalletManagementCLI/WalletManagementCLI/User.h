@@ -1,7 +1,16 @@
 #pragma once
-#include <string>
+#using <System.Data.dll>
 
+#include <string>
+#include <vector>
 #include <chrono>
+
+using namespace System;
+using namespace System::Data;
+using namespace System::Data::SqlClient;
+
+
+
 class User
 {
 public:
@@ -16,5 +25,8 @@ public:
 
   static std::string generatePassword();
   bool AddNewUser();
+  static std::vector<User> GetAllUsers();
+  static bool Login(std::string userName, std::string password);
 };
 
+extern User* loggedInUser;
