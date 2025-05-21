@@ -2,6 +2,9 @@
 #include "DatabaseManager.h"
 #include <iostream>
 
+#define SuccessStatus "Success"
+#define FailedStatus "Failed"
+
 Wallet::Wallet(int walletId, int userId, double balance)
   : walletId(walletId), userId(userId), balance(balance) {}
 
@@ -210,7 +213,14 @@ std::vector<TransactionRecord> Wallet::GetTransactionHistory(int userId) {
 
       System::String^ netStatusName = reader->GetString(4);
       transaction.statusName = std::string((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(netStatusName).ToPointer());
-
+      if (transaction.statusName == SuccessStatus)
+      {
+        transaction.statusName = "Thanh cong";
+      }
+      if (transaction.statusName == FailedStatus)
+      {
+        transaction.statusName = "That bai";
+      }
 
       transactions.push_back(transaction);
     }

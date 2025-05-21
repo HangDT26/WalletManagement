@@ -1,5 +1,3 @@
-﻿  Wallet.cpp
-  WalletManagementCLI.cpp
-  Generating Code...
+﻿  WalletManagementCLI.cpp
   AssemblyInfo.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
   WalletManagementCLI.vcxproj -> E:\PTIT\WalletManagement\WalletManagementCLI\Debug\WalletManagementCLI.exe

@@ -36,6 +36,15 @@ bool User::AddNewUser() {
     return false;
   }
 
+  if (password.empty())
+  {
+    password = generatePassword();
+  }
+
+  if (role.empty())
+  {
+    role = "User";
+  }
   try {
     SqlConnection^ conn = DatabaseManager::GetConnection();
     conn->Open();
@@ -74,15 +83,16 @@ std::vector<User> User::GetAllUsers() {
     SqlConnection^ conn = DatabaseManager::GetConnection();
     conn->Open();
 
-    String^ query = "SELECT UserName, Role FROM Users Where Role <> 'Admin'";
+    String^ query = "SELECT UserId, UserName, Role FROM Users Where Role <> 'Admin'";
     SqlCommand^ cmd = gcnew SqlCommand(query, conn);
 
     SqlDataReader^ reader = cmd->ExecuteReader();
     while (reader->Read()) {
+      int id = reader->GetInt32(0);
       std::string userName = std::string((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(reader["UserName"]->ToString()).ToPointer());
       std::string role = std::string((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(reader["Role"]->ToString()).ToPointer());
 
-      userList.emplace_back(userName, "", role);
+      userList.emplace_back(id, userName, "", role);
     }
 
     reader->Close();
@@ -185,7 +195,7 @@ bool User::VerifyOTP(int userId, std::string inputOTP) {
   }
 }
 
-bool User::ChangePassword(std::string newPassword) {
+bool User::ChangePassword(int userId, std::string newPassword) {
   if (loggedInUser == nullptr) {
     std::cout << "Ban chua dang nhap!" << std::endl;
     return false;
@@ -206,7 +216,7 @@ bool User::ChangePassword(std::string newPassword) {
     SqlCommand^ cmd = gcnew SqlCommand(query, conn);
 
     cmd->Parameters->AddWithValue("@OTP", gcnew String(otpCode.c_str()));
-    cmd->Parameters->AddWithValue("@UserId", userId);
+    cmd->Parameters->AddWithValue("@UserId", loggedInUser->userId);
     cmd->ExecuteNonQuery();
     conn->Close();
 
@@ -225,7 +235,7 @@ bool User::ChangePassword(std::string newPassword) {
     query = "UPDATE Users SET Password = @NewPassword WHERE UserId = @UserId;";
     cmd = gcnew SqlCommand(query, conn);
 
-    cmd->Parameters->AddWithValue("@UserId", loggedInUser->userId);
+    cmd->Parameters->AddWithValue("@UserId", userId);
     cmd->Parameters->AddWithValue("@NewPassword", gcnew String(newPassword.c_str()));
 
     int result = cmd->ExecuteNonQuery();
