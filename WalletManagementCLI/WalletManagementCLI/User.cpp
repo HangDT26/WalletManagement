@@ -22,6 +22,12 @@ std::string User::generatePassword() {
   return password;
 }
 
+std::string User::generateOTP() {
+  srand(time(0));
+  int otp = 100000 + rand() % 900000;
+  return std::to_string(otp);
+}
+
 //====================================
 
 bool User::AddNewUser() {
@@ -110,8 +116,6 @@ bool User::Login(std::string userName, std::string password) {
       role = std::string((char*)System::Runtime::InteropServices::Marshal::StringToHGlobalAnsi(netRole).ToPointer());
       reader->Close();
       conn->Close();
-      loggedInUser = new User(userId, userName, password, role);
-      return true;
     }
     else {
       std::cout << "Sai ten nguoi dung hoac mat khau!" << std::endl;
@@ -120,8 +124,121 @@ bool User::Login(std::string userName, std::string password) {
       return false;
     }
 
-   
+    std::string otpCode = generateOTP();
+    conn->Open();
+    query = "INSERT INTO OTP (OTP, UserId, IsUsed, ExpireTime) VALUES (@OTP, @UserId, 0, DATEADD(MINUTE, 5, GETDATE()));";
+    cmd = gcnew SqlCommand(query, conn);
+    cmd->Parameters->AddWithValue("@OTP", gcnew String(otpCode.c_str()));
+    cmd->Parameters->AddWithValue("@UserId", userId);
+    cmd->ExecuteNonQuery();
+    conn->Close();
 
+    std::cout << "Ma OTP da duoc tao: " << otpCode << std::endl;
+    std::cout << "Vui long nhap ma OTP de xac nhan dang nhap: ";
+    std::string inputOTP;
+    std::cin >> inputOTP;
+
+    if (VerifyOTP(userId, inputOTP)) {
+      loggedInUser = new User(userId, userName, password, role);
+      return true;
+    }
+    else {
+      std::cout << "OTP khong hop le hoac het han!" << std::endl;
+      return false;
+    }
+
+  }
+  catch (Exception^ e) {
+    Console::WriteLine("Loi ket noi: " + e->Message);
+    return false;
+  }
+}
+
+bool User::VerifyOTP(int userId, std::string inputOTP) {
+  try {
+    SqlConnection^ conn = DatabaseManager::GetConnection();
+    conn->Open();
+
+    String^ query = "SELECT OTPId FROM OTP WHERE UserId = @UserId AND OTP = @OTP AND IsUsed = 0 AND ExpireTime > GETDATE();";
+    SqlCommand^ cmd = gcnew SqlCommand(query, conn);
+    cmd->Parameters->AddWithValue("@UserId", userId);
+    cmd->Parameters->AddWithValue("@OTP", gcnew String(inputOTP.c_str()));
+
+    SqlDataReader^ reader = cmd->ExecuteReader();
+    bool isValid = reader->Read();
+    int otpId = isValid ? reader->GetInt32(0) : -1;
+    reader->Close();
+
+    if (isValid) {
+      query = "UPDATE OTP SET IsUsed = 1 WHERE OTPId = @OTPId;";
+      cmd = gcnew SqlCommand(query, conn);
+      cmd->Parameters->AddWithValue("@OTPId", otpId);
+      cmd->ExecuteNonQuery();
+    }
+
+    conn->Close();
+    return isValid;
+  }
+  catch (Exception^ e) {
+    Console::WriteLine("Loi ket noi: " + e->Message);
+    return false;
+  }
+}
+
+bool User::ChangePassword(std::string newPassword) {
+  if (loggedInUser == nullptr) {
+    std::cout << "Ban chua dang nhap!" << std::endl;
+    return false;
+  }
+
+  if (newPassword.empty()) {
+    std::cout << "Mat khau moi khong duoc de trong!" << std::endl;
+    return false;
+  }
+
+  try {
+    SqlConnection^ conn = DatabaseManager::GetConnection();
+
+    std::string otpCode = generateOTP();
+    conn->Open();
+
+    String^ query = "INSERT INTO OTP (OTP, UserId, IsUsed, ExpireTime) VALUES (@OTP, @UserId, 0, DATEADD(MINUTE, 5, GETDATE()));";
+    SqlCommand^ cmd = gcnew SqlCommand(query, conn);
+
+    cmd->Parameters->AddWithValue("@OTP", gcnew String(otpCode.c_str()));
+    cmd->Parameters->AddWithValue("@UserId", userId);
+    cmd->ExecuteNonQuery();
+    conn->Close();
+
+    std::cout << "Ma OTP da duoc tao: " << otpCode << std::endl;
+    std::cout << "Nhap ma OTP de xac nhan thay doi mat khau: ";
+    std::string inputOTP;
+    std::cin >> inputOTP;
+
+    if (!VerifyOTP(loggedInUser->userId, inputOTP)) {
+      std::cout << "OTP khong hop le hoac het han! Mat khau khong duoc thay doi." << std::endl;
+      return false;
+    }
+
+    conn->Open();
+
+    query = "UPDATE Users SET Password = @NewPassword WHERE UserId = @UserId;";
+    cmd = gcnew SqlCommand(query, conn);
+
+    cmd->Parameters->AddWithValue("@UserId", loggedInUser->userId);
+    cmd->Parameters->AddWithValue("@NewPassword", gcnew String(newPassword.c_str()));
+
+    int result = cmd->ExecuteNonQuery();
+    conn->Close();
+
+    if (result > 0) {
+      loggedInUser->password = newPassword;
+      return true;
+    }
+    else {
+      std::cout << "Loi: Khong tim thay nguoi dung!" << std::endl;
+      return false;
+    }
   }
   catch (Exception^ e) {
     Console::WriteLine("Loi ket noi: " + e->Message);

@@ -37,8 +37,6 @@ bool isUserLoggedIn() {
   return true;
 }
 
-
-
 bool isAdmin() {
   if (!isUserLoggedIn()) return false;
 
@@ -48,8 +46,6 @@ bool isAdmin() {
   }
   return true;
 }
-
-
 
 void registerUser() {
   if (!isAdmin()) return;
@@ -102,6 +98,24 @@ void loginUser() {
   }
 }
 
+void changePassword() {
+  if (loggedInUser == nullptr) {
+    std::cout << "Ban chua dang nhap!" << std::endl;
+    return;
+  }
+
+  std::cout << "Nhap mat khau moi: ";
+  std::string newPassword;
+  std::cin.ignore();
+  std::getline(std::cin, newPassword);
+
+  if (loggedInUser->ChangePassword(newPassword)) {
+    std::cout << "Mat khau da duoc cap nhat thanh cong!" << std::endl;
+  }
+  else {
+    std::cout << "Thay doi mat khau that bai!" << std::endl;
+  }
+}
 int main() {
   int choice;
 
@@ -123,6 +137,7 @@ int main() {
       break;
     case 3:
       cout << "Thay doi mat khau...\n";
+      changePassword();
       break;
     case 4:
       cout << "Chuyen diem...\n";
