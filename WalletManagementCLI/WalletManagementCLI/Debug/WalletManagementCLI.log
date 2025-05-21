@@ -1,13 +1,5 @@
-﻿  pch.cpp
-  AssemblyInfo.cpp
-  DatabaseManager.cpp
-  Otp.cpp
-  Transaction.cpp
-  TransactionStatus.cpp
-  User.cpp
-  Wallet.cpp
+﻿  Wallet.cpp
   WalletManagementCLI.cpp
   Generating Code...
-  .NETFramework,Version=v4.8.AssemblyAttributes.cpp
   AssemblyInfo.obj : MSIL module encountered; incremental linking is disabled for MSIL; performing full link
   WalletManagementCLI.vcxproj -> E:\PTIT\WalletManagement\WalletManagementCLI\Debug\WalletManagementCLI.exe
