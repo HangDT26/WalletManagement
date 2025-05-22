@@ -141,7 +141,7 @@ Hệ thống sử dụng hệ quản trị cơ sở dữ liệu MS SQL
 6. Tải và chạy chương trình:
 - Clone project về từ github
 - Chạy SQL Management ở máy local, backup database bằng file backup đi kèm trong folder dự án ( nếu máy chưa có MS SQL cần cài SQL server và SQL management)
-- Build project bằng Visual studio ( đã cài bộ mở rộng C++/CRL và .Net framwork 4.8)
+- Build project bằng Visual studio ( đã cài bộ mở rộng C++/CLR và .Net framwork 4.8)
 - Cập nhật file DatabaseManagement: cập nhật connection string theo thông tin kết nối cơ sở dữ liệu tại máy local
 - Run dự án và chạy thử ( tham khảo video demo có trong folder dự án)
 
